@@ -2,6 +2,7 @@
   session_start();
   date_default_timezone_set('UTC');
   header('Content-Type: application/json');
+  error_reporting(E_ERROR | E_PARSE);
 
   $posts_exist_locally = false;
   $jsonOutput = '';
@@ -16,6 +17,8 @@
   include './src/queries.php';
 
   $connectionParams = loadVars();
+  if( !is_object($connectionParams) ) return 0;
+
   $newConnection = new Connection;
   $connectionInitialization = $newConnection->initializeConnection($connectionParams->client_id, $connectionParams->email, $connectionParams->name);
   $jsonOutput = $connectionInitialization->message;
