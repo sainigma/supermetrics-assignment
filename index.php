@@ -3,7 +3,8 @@
   date_default_timezone_set('UTC');
   header('Content-Type: application/json');
 
-  $posts_exist_locally = true;
+  $posts_exist_locally = false;
+  $jsonOutput = '';
 
   include './src/loadVars.php';
   include './src/helpers/pageParser.php';
@@ -14,40 +15,31 @@
   include './src/models/Post.php';
   include './src/queries.php';
 
-  printf('{');
+  $connectionParams = loadVars();
   $newConnection = new Connection;
-  $userInitializationSuccess=$newConnection->initializeConnection($connectionParams->client_id, $connectionParams->email, $connectionParams->name);
-  
-  if(!$userInitializationSuccess){
-    printf('"status":"Failed to initialize connection"');
-    unset($newConnection);
-  }
-  else{
+  $connectionInitialization = $newConnection->initializeConnection($connectionParams->client_id, $connectionParams->email, $connectionParams->name);
+  $jsonOutput = $connectionInitialization->message;
+
+  if( $connectionInitialization->success ){
     $posts = null;
-    if($posts_exist_locally){
-      $localPosts = file_get_contents('localPosts');
-      $posts = unserialize($localPosts);
-    }else{
-      $posts = parseAllPagesToPosts($newConnection,1,10);
-      $localPosts = serialize($posts);
-      file_put_contents('localPosts',$localPosts);
-    }
+    $posts = parseAllPagesToPosts($newConnection,1,10);
+    $users = assignPostsToUsers($posts);
 
     $postKeys = array_keys($posts);
-    $totalRange = new Range;
-    $totalRange->start = $posts[ $postKeys[0] ]->timestamp;
-    $totalRange->end = $posts[ $postKeys[ count($postKeys)-1 ] ]->timestamp;
-    $ranges = splitRangeToMonths($totalRange);
+    $rangeBetweenFirstAndLastPost = new Range;
+    $rangeBetweenFirstAndLastPost->start = $posts[ $postKeys[0] ]->timestamp;
+    $rangeBetweenFirstAndLastPost->end = $posts[ $postKeys[ count($postKeys)-1 ] ]->timestamp;
+    $ranges = splitRangeToMonths($rangeBetweenFirstAndLastPost);
 
-    $users = assignPostsToUsers($posts);
     $usersOutput = '';
     $omitComma = true;
-    foreach($users as $user){
-      if($omitComma)$omitComma=false;
-      else $usersOutput.=',';
-      $usersOutput.=$user->buildStatistics($posts,$ranges);
+    foreach( $users as $user ){
+      if( $omitComma ) $omitComma = false;
+      else $usersOutput .= ',';
+      $usersOutput .= $user->buildStatistics($posts,$ranges);
     }
-    printf('"users":[ %s ]', $usersOutput);
-  }
-  printf('}');
+    $jsonOutput .= sprintf('"users":[ %s ]', $usersOutput);
+  }else unset($newConnection);
+
+  printf('{%s}', $jsonOutput);
 ?>

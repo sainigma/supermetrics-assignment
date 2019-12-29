@@ -7,7 +7,7 @@
       $this->start = mktime(0,0,0,$monthStart,1,$year);
       $monthEnd = $monthStart+$durationInMonths;
       $yearEnd = $year;
-      if($monthEnd>12){
+      if( $monthEnd>12 ){
         $yearEnd += floor( $monthEnd/12 );
         $monthEnd -= $monthStart;
       }

@@ -9,10 +9,10 @@ function splitRangeToMonths($totalRange){
   do{
     $range = new Range;
     $range->setRangeByMonth($startMonth+$months,$startYear,1);
-    $lastTimestamp=$range->end;
+    $lastTimestamp = $range->end;
     array_push($ranges,$range);
     $months++;
-  }while($lastTimestamp<$totalRange->end);
+  } while( $lastTimestamp<$totalRange->end );
   return $ranges;
 }
 

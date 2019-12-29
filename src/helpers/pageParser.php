@@ -22,7 +22,7 @@ function assignPostsToUsers($posts){
 }
 
 function parsePage($page,$posts){
-  foreach($page->data->posts as $post){
+  foreach( $page->data->posts as $post ){
     $newPost = new Post;
     $newPost->process($post);
     $posts[$post->id] = $newPost;
@@ -32,7 +32,7 @@ function parsePage($page,$posts){
 
 function parseAllPagesToPosts($connection, $start, $end){
   $posts = [];
-  for($i=$start; $i<=$end; $i++){
+  for( $i=$start; $i<=$end; $i++ ){
     $page = requestPage($connection->sl_token,$i);
     $posts = parsePage($page,$posts);
   }

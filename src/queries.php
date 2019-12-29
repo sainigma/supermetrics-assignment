@@ -3,12 +3,12 @@
   function runQuery( $URI, $method, $params, $useFields ){
     $query = curl_init();
 
-    if(!$useFields) $urlParams = '?'.http_build_query($params);
+    if( !$useFields ) $urlParams = '?'.http_build_query($params);
     else $urlParams = '';
 
     curl_setopt($query, CURLOPT_URL, $URI.$urlParams);
-    if(!strcmp($method,"POST"))curl_setopt($query, CURLOPT_POST, true);
-    if($useFields)curl_setopt($query, CURLOPT_POSTFIELDS, $params);
+    if( !strcmp($method,"POST") )curl_setopt($query, CURLOPT_POST, true);
+    if( $useFields )curl_setopt($query, CURLOPT_POSTFIELDS, $params);
     curl_setopt($query, CURLOPT_RETURNTRANSFER, true);
 
     $result = json_decode( curl_exec($query) );
@@ -24,7 +24,7 @@
 
   function requestToken($params){
     $response = runQuery( $GLOBALS['uri_post'], "POST", $params, true);
-    if( $response['status']!==400 && !strcmp( $response['result']->data->client_id, $params['client_id'] )){
+    if( $response['status'] != 400 && !strcmp( $response['result']->data->client_id, $params['client_id'] ) ){
       return $response['result']->data->sl_token;
     }else return -1;
   }
@@ -35,7 +35,6 @@
       'page'=>$page
     ];
     $response = runQuery( $GLOBALS['uri_get'], "GET", $params, false);
-    print_r($response['result']);
     if( $response['status']!==400 ) return $response['result'];
     else return -1;
   }

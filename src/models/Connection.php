@@ -9,19 +9,29 @@ class Connection {
     public function tokenIsValid(){ return( !($this->sl_token==null || time()-$this->timestamp>3600) ); }
 
     public function initializeConnection($client_id, $email, $name){
+      $result = (object) array(
+        'message' => 'error',
+        'success' => 0
+      );
       $this->client_id = $client_id;
       $this->email = $email;
       $this->name = $name;
       $this->loadTokenFromMemory();
       if( $this->tokenIsValid() ){
-        printf('"status":"Token loaded from memory",');
-        return 1;
-      }else $this->requestAndSetToken();
-      return $this->tokenIsValid();
+        $result->message = '"status":"Token loaded from memory",';
+        $result->success = 1;
+      }else{
+        $result->message = '"status":"New token requested",';
+        $this->requestAndSetToken();
+        $result->success = $this->tokenIsValid();
+      }
+      if(!$result->success){
+        $result->message = '"status":"Failed to initialize connection"';
+      }
+      return $result;
     }
 
     private function requestAndSetToken(){
-      printf('"status":"New token requested",');
       $params = [
         'client_id'=>$this->client_id,
         'email'=>$this->email,

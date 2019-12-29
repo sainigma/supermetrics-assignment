@@ -20,7 +20,7 @@ class User{
   private function inRange($timestamp, $range){ if( $timestamp >= $range->start && $timestamp < $range->end ) return true; else return false; }
 
   private function seekStart($start,$allPosts){
-    for($i=0; $i<$this->postCount; $i++){
+    for( $i=0; $i<$this->postCount; $i++ ){
       $key = $this->posts[$i];
       if( $allPosts[ $key ]->timestamp > $start ) return $i;
     }
@@ -29,7 +29,7 @@ class User{
 
   private function averageChars($range,$allPosts){
     $index = $this->seekStart($range->start,$allPosts);
-    if($index==-1)return 0;
+    if( $index==-1 ) return 0;
     $sum = 0;
     $processedPosts = 0;
     do{
@@ -37,13 +37,13 @@ class User{
       $sum += strlen($post->message);
       $processedPosts++;
       $index++;
-    }while($index<$this->postCount && $this->inRange($post->timestamp, $range));
+    } while( $index<$this->postCount && $this->inRange($post->timestamp, $range) );
     return $sum/(float)$processedPosts;
   }
 
   private function longestPost($range,$allPosts){
     $index = $this->seekStart($range->start,$allPosts);
-    if($index==-1)return 0;
+    if( $index==-1 ) return 0;
     $maxLength = 0;
     $longestPostId = null;
     do{
@@ -54,7 +54,7 @@ class User{
         $longestPostId = $post->id;
       }
       $index++;
-    }while($index<$this->postCount && $this->inRange($post->timestamp, $range));
+    } while( $index<$this->postCount && $this->inRange($post->timestamp, $range) );
     $result = [
       "length"=>$maxLength,
       "postId"=>$longestPostId,
@@ -65,13 +65,13 @@ class User{
 
   private function countPosts($range,$allPosts){
     $index = $this->seekStart($range->start,$allPosts);
-    if($index==-1)return 0;
+    if( $index==-1 ) return 0;
     $count = 0;
     do{
       $post = $allPosts[ $this->posts[$index] ];
       $index++;
       $count++;
-    }while($index<$this->postCount && $this->inRange($post->timestamp, $range));
+    } while( $index<$this->postCount && $this->inRange($post->timestamp, $range) );
     return $count;
   }
 
@@ -80,12 +80,12 @@ class User{
     $output = '';
 
     $omitComma = true;
-    foreach($ranges as $range){
+    foreach( $ranges as $range ){
       $postsInWeek = $this->countPosts($range,$allPosts);
       $week = (int)date("W",$range->start);
       if( $omitComma ) $omitComma = false;
-      else $output.=',';
-      $output.=sprintf( '"%d":%d', $week, (int)$postsInWeek );
+      else $output .= ',';
+      $output .= sprintf( '"%d":%d', $week, (int)$postsInWeek );
     }
     return $output;
   }
@@ -93,7 +93,7 @@ class User{
   private function buildMonthStatistics($allPosts,$ranges){
     $monthsOutput = '';
     $omitComma = true;
-    foreach($ranges as $range){
+    foreach( $ranges as $range ){
       $longest = $this->longestPost($range,$allPosts);
       $postsInMonth = $this->countPosts($range,$allPosts);
       $weeksOutput =  $this->buildWeekStatistics($allPosts,$range);
