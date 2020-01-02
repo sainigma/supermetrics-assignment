@@ -4,7 +4,6 @@
   header('Content-Type: application/json');
   error_reporting(E_ERROR | E_PARSE);
 
-  $posts_exist_locally = false;
   $jsonOutput = '';
 
   include './src/loadVars.php';
@@ -25,6 +24,7 @@
 
   if( $connectionInitialization->success ){
     $posts = null;
+
     $posts = parseAllPagesToPosts($newConnection,1,10);
     $users = assignPostsToUsers($posts);
 
@@ -33,6 +33,12 @@
     $rangeBetweenFirstAndLastPost->start = $posts[ $postKeys[0] ]->timestamp;
     $rangeBetweenFirstAndLastPost->end = $posts[ $postKeys[ count($postKeys)-1 ] ]->timestamp;
     $ranges = splitRangeToMonths($rangeBetweenFirstAndLastPost);
+
+    $dateFormat = "M d Y, G:i";
+    $jsonOutput .= sprintf(
+      '"timerange": {"first post":"%s", "last post":"%s"},',
+      date($dateFormat,$rangeBetweenFirstAndLastPost->start),
+      date($dateFormat,$rangeBetweenFirstAndLastPost->end));
 
     $usersOutput = '';
     $omitComma = true;

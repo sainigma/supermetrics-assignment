@@ -19,13 +19,13 @@ function splitRangeToMonths($totalRange){
 function splitMonthToWeeks($range){
   $ranges = array();
   $previousWeek = (int)date("W",$range->start);
-
+  $monthAtBeginning = (int)date("m",$range->start);
   $currentDate = $range->start;
 
-  while( (int)date("m",$currentDate)==(int)date("m",$range->start) ){
+  while( (int)date("m",$currentDate)==$monthAtBeginning ){
     $range = new Range;
     $range->start = $currentDate;
-    while( (int)date("W",$currentDate)==$previousWeek  ) $currentDate += 24*3600;
+    while( (int)date("W",$currentDate)==$previousWeek && (int)date("m",$currentDate)==$monthAtBeginning ) $currentDate += 24*3600;
     $previousWeek = (int)date("W",$currentDate);
     $range->end = $currentDate;
     array_push($ranges,$range);

@@ -19,39 +19,45 @@ class User{
 
   private function inRange($timestamp, $range){ if( $timestamp >= $range->start && $timestamp < $range->end ) return true; else return false; }
 
-  private function seekStart($start,$allPosts){
+  private function seekStart($range,$allPosts){
     for( $i=0; $i<$this->postCount; $i++ ){
       $key = $this->posts[$i];
-      if( $allPosts[ $key ]->timestamp > $start ) return $i;
+      $currentTimestamp = $allPosts[ $key ]->timestamp;
+      if( $currentTimestamp >= $range->start && $currentTimestamp < $range->end ) return $i;
+      else if( $currentTimestamp > $range->end ) return -1;
     }
     return -1;
   }
 
   private function averageChars($range,$allPosts){
-    $index = $this->seekStart($range->start,$allPosts);
+    $index = $this->seekStart($range,$allPosts);
     if( $index==-1 ) return 0;
     $sum = 0;
     $processedPosts = 0;
     do{
       $post = $allPosts[ $this->posts[$index] ];
-      $sum += strlen($post->message);
-      $processedPosts++;
+      if( $this->inRange($post->timestamp, $range) ){
+        $sum += strlen($post->message);
+        $processedPosts++;
+      }
       $index++;
     } while( $index<$this->postCount && $this->inRange($post->timestamp, $range) );
     return $sum/(float)$processedPosts;
   }
 
   private function longestPost($range,$allPosts){
-    $index = $this->seekStart($range->start,$allPosts);
+    $index = $this->seekStart($range,$allPosts);
     if( $index==-1 ) return 0;
     $maxLength = 0;
     $longestPostId = null;
     do{
       $post = $allPosts[ $this->posts[$index] ];
-      $postLength = strlen($post->message);
-      if( $postLength > $maxLength ){
-        $maxLength = $postLength;
-        $longestPostId = $post->id;
+      if( $this->inRange($post->timestamp, $range) ){
+        $postLength = strlen($post->message);
+        if( $postLength > $maxLength ){
+          $maxLength = $postLength;
+          $longestPostId = $post->id;
+        }
       }
       $index++;
     } while( $index<$this->postCount && $this->inRange($post->timestamp, $range) );
@@ -64,13 +70,13 @@ class User{
   }
 
   private function countPosts($range,$allPosts){
-    $index = $this->seekStart($range->start,$allPosts);
+    $index = $this->seekStart($range,$allPosts);
     if( $index==-1 ) return 0;
     $count = 0;
     do{
       $post = $allPosts[ $this->posts[$index] ];
       $index++;
-      $count++;
+      if( $this->inRange($post->timestamp, $range) ) $count++;
     } while( $index<$this->postCount && $this->inRange($post->timestamp, $range) );
     return $count;
   }
